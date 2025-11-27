@@ -1,0 +1,11 @@
+profiles:
+  work:
+    allowed_scopes: [bio.basic, resume.public, projects.recent]
+    redactions: [mask_emails, drop_phone, drop_exact_address]
+scopes:
+  bio.basic:
+    includes: ["notes/bio.md", "tags:bio"]
+  projects.recent:
+    query: "type:project sort:updated_desc limit:10"
+defaults:
+  ttl_minutes: 20

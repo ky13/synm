@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  chroma:
+    ports:
+      - "8000:8000"
+    environment:
+      - CHROMA_SERVER_AUTH_PROVIDER=chromadb.auth.token.TokenAuthServerProvider
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=chromadb.auth.token.TokenConfigServerCredentialsProvider
+      - CHROMA_SERVER_AUTH_TOKEN_TRANSPORT_HEADER=X_CHROMA_TOKEN
+      - CHROMA_SERVER_AUTH_CREDENTIALS=test-token
+
+  mediator:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    environment:
+      - RELOAD=true
+      - LOG_LEVEL=DEBUG
+    command: uvicorn sanctum.main:app --host 0.0.0.0 --port 8080 --reload
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sanctum-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - sanctum-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sanctum-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=redis-datasource
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - sanctum-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus

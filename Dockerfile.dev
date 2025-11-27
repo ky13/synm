@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies and development tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+COPY pyproject.toml .
+
+# Install all dependencies including dev
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -e ".[dev]"
+
+# Download spaCy model
+RUN python -m spacy download en_core_web_sm
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Development volume mounts handled by docker-compose
+# Run with reload enabled
+CMD ["uvicorn", "sanctum.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

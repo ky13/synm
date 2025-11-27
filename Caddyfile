@@ -1,0 +1,84 @@
+# Synm Personal AI Vault - Caddy Configuration
+
+# Replace with your actual domain
+vault.example.com {
+    encode gzip
+
+    # TLS configuration
+    tls you@example.com
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+        -Server
+    }
+
+    # Rate limiting
+    rate_limit {
+        zone api {
+            key {remote_host}
+            events 60
+            window 1m
+        }
+    }
+
+    # API routes
+    @api path /v1/*
+    handle @api {
+        rate_limit {zone api}
+        reverse_proxy mediator:8080 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Health check endpoint
+    handle /health {
+        reverse_proxy mediator:8080
+    }
+
+    # Metrics endpoint (protected)
+    @metrics path /metrics
+    handle @metrics {
+        basicauth {
+            # INSECURE EXAMPLE - Change in production! (current: admin/admin)
+            admin $2a$14$1l.zwykHdrFJXaV.lMfrYOTqZUDbGqBvPeE7t6YnlhcQbBqLJeGoi
+        }
+        reverse_proxy mediator:8080
+    }
+
+    # Default handler
+    handle {
+        respond "Synm Personal AI Vault" 200
+    }
+}
+
+# Local development without TLS
+:80 {
+    encode gzip
+
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+
+    @api path /v1/*
+    handle @api {
+        reverse_proxy mediator:8080
+    }
+
+    handle /health {
+        reverse_proxy mediator:8080
+    }
+
+    handle {
+        respond "Synm Personal AI Vault (Development)" 200
+    }
+}

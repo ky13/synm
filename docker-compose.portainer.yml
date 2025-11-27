@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  chroma:
+    image: ghcr.io/chroma-core/chroma:0.4.24
+    container_name: synm-chroma
+    volumes:
+      - /opt/synm/chroma:/chroma/chroma
+    networks:
+      - synm-network
+    restart: unless-stopped
+
+  mediator:
+    build:
+      context: https://github.com/ky13/synm.git#main
+      dockerfile: mediator/Dockerfile
+    container_name: synm-mediator
+    environment:
+      - MEDIATOR_PAT=${MEDIATOR_PAT}
+      - CONTEXT_TTL_MINUTES=20
+      - MAX_CONTEXT_BYTES=20000
+      - CHROMA_URL=http://chroma:8000
+      - SQLITE_PATH=/app/data/mediator.sqlite
+      - LOG_LEVEL=INFO
+    depends_on:
+      - chroma
+    volumes:
+      - /opt/synm/data:/app/data
+      - /opt/synm/policies:/app/app/policies
+      - /opt/synm/notes:/app/notes
+    networks:
+      - synm-network
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synm.rule=Host(`synm.app.vd`)"
+      - "traefik.http.routers.synm.entrypoints=websecure"
+      - "traefik.http.routers.synm.tls=true"
+      - "traefik.http.services.synm.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  synm-network:
+    driver: bridge
+  traefik:
+    external: true

@@ -1,0 +1,2 @@
+- 2024: Cross-account AWS CI/CD hardening and developer tooling.
+- 2023: Customizable VPC templates and security baselines.

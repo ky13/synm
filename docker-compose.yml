@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: synm-chroma
+    volumes:
+      - ./chroma:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    ports:
+      - "8000:8000"
+    networks:
+      - synm-network
+    restart: unless-stopped
+
+
+  mediator:
+    build:
+      context: ./mediator
+      dockerfile: Dockerfile
+    container_name: synm-mediator
+    env_file: .env
+    depends_on:
+      - chroma
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./mediator/app/policies:/app/app/policies
+      - ./notes:/app/notes
+    networks:
+      - synm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: synm-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+    networks:
+      - synm-network
+    restart: unless-stopped
+    depends_on:
+      - mediator
+
+networks:
+  synm-network:
+    driver: bridge
+
+volumes:
+  chroma_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

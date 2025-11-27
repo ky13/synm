@@ -1,0 +1,11 @@
+__pycache__/
+.ruff_cache/
+.venv/
+.env
+*.sqlite
+chroma/
+.DS_Store
+.claude/
+.vscode/
+CLAUDE.md
+pat.txt
