@@ -165,32 +165,39 @@ async def get_context(
     # Gather context from stores
     context_parts = []
     citations = []
-    
+    seen_content = set()  # Track content to avoid duplicates
+
     # Get data from vector store (semantic search)
     vector_results = await vector_store.search(
         query=request.prompt,
         scopes=request.scopes,
         limit=5,
     )
-    
+
     for result in vector_results:
-        context_parts.append(result["content"])
-        citations.append({
-            "type": "vector",
-            "ref": result["source"],
-            "score": str(result["score"]),
-        })
-    
+        content_hash = hash(result["content"].strip())
+        if content_hash not in seen_content:
+            context_parts.append(result["content"])
+            seen_content.add(content_hash)
+            citations.append({
+                "type": "vector",
+                "ref": result["source"],
+                "score": str(result["score"]),
+            })
+
     # Get data from SQL store (structured queries)
     for scope in request.scopes:
         scope_data = await sql_store.get_scope_data(scope)
         if scope_data:
-            context_parts.append(scope_data["content"])
-            citations.append({
-                "type": "structured",
-                "ref": f"scope:{scope}",
-            })
-    
+            content_hash = hash(scope_data["content"].strip())
+            if content_hash not in seen_content:
+                context_parts.append(scope_data["content"])
+                seen_content.add(content_hash)
+                citations.append({
+                    "type": "structured",
+                    "ref": f"scope:{scope}",
+                })
+
     # Combine and redact context
     raw_context = "\n\n".join(context_parts)
     redacted_context = await redactor.redact(
