@@ -111,9 +111,9 @@ class VectorStore:
             
             # Generate a unique ID based on source
             doc_id = f"{scope}:{source}".replace("/", "_").replace(" ", "_")
-            
-            # Add to collection
-            self.collection.add(
+
+            # Upsert to collection (add or update if exists)
+            self.collection.upsert(
                 documents=[content],
                 metadatas=[doc_metadata],
                 ids=[doc_id],
