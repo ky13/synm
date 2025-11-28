@@ -12,6 +12,32 @@ npm run build
 
 ## Configuration
 
+### Claude Code (CLI)
+
+Create `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "synm": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/to/synm/mcp-server/build/index.js"],
+      "env": {
+        "SYNM_API_URL": "https://synm.app.vd",
+        "SYNM_API_TOKEN": "your-mediator-pat-here"
+      }
+    }
+  }
+}
+```
+
+Replace `/path/to/synm` with the actual path to your Synm repo.
+
+**Note:** Add `.mcp.json` to `.gitignore` to avoid committing your PAT token.
+
+### Claude Desktop (GUI)
+
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json

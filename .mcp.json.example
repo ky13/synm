@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "synm": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/path/to/synm/mcp-server/build/index.js"],
+      "env": {
+        "SYNM_API_URL": "https://synm.app.vd",
+        "SYNM_API_TOKEN": "your-mediator-pat-here"
+      }
+    }
+  }
+}
