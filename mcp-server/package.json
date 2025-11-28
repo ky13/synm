@@ -1,0 +1,22 @@
+{
+  "name": "synm-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Synm Personal AI Vault",
+  "type": "module",
+  "bin": {
+    "synm-mcp-server": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.9"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
