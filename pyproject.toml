@@ -3,11 +3,11 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sanctum"
+name = "synm"
 version = "0.1.0"
 description = "Personal AI Vault - Privacy-first memory keeper for AI interactions"
 authors = [{name = "ky13"}]
-license = {text = "Apache-2.0"}
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -44,8 +44,6 @@ dev = [
     "pre-commit>=3.5.0",
 ]
 
-[project.scripts]
-sanctum = "sanctum.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -69,4 +67,4 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=sanctum --cov-report=html --cov-report=term"
+addopts = "-v --cov=mediator --cov-report=html --cov-report=term"

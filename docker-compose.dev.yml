@@ -20,23 +20,23 @@ services:
     environment:
       - RELOAD=true
       - LOG_LEVEL=DEBUG
-    command: uvicorn sanctum.main:app --host 0.0.0.0 --port 8080 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: sanctum-prometheus
+    container_name: synm-prometheus
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./data/prometheus:/prometheus
     ports:
       - "9090:9090"
     networks:
-      - sanctum-network
+      - synm-network
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
-    container_name: sanctum-grafana
+    container_name: synm-grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=redis-datasource
@@ -47,7 +47,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - sanctum-network
+      - synm-network
     restart: unless-stopped
     depends_on:
       - prometheus

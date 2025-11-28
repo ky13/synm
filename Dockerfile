@@ -27,13 +27,13 @@ RUN mkdir -p /app/data /app/logs /app/notes
 ENV PYTHONPATH=/app
 
 # Run as non-root user
-RUN useradd -m -u 1000 sanctum && \
-    chown -R sanctum:sanctum /app
-USER sanctum
+RUN useradd -m -u 1000 synm && \
+    chown -R synm:synm /app
+USER synm
 
 # Health check endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-# Run the application
-CMD ["uvicorn", "sanctum.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run the application (deprecated - use mediator/Dockerfile instead)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
